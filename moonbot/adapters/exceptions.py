@@ -1,0 +1,2 @@
+class BotStateNotFound(Exception):
+    pass

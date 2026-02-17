@@ -1,0 +1,49 @@
+services:
+  db-initializer:
+    build:
+      context: .
+    environment:
+      DB_URI: "postgresql://admin:admin@postgres:5432/moon"
+    command: ["python", "-m", "moonbot.app.init_db"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+    environment:
+      DB_URI: "postgresql://admin:admin@postgres:5432/moon"
+    ports:
+      - 8080:8080
+    depends_on:
+      db-initializer:
+        condition: service_completed_successfully
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      PGDATA: /data/postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test-runner:
+    profiles:
+      - test
+    build:
+      context: .
+      target: test
+    environment:
+      API_URL: "http://api:8080/"
+    depends_on:
+      api:
+        condition: service_started
