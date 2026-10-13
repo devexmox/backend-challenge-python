@@ -11,22 +11,18 @@ docker compose up test-runner
 
 To run tests locally instead, first install the dependencies using
 ```
-pip install -r requirements-dev.txt
-```
-or
-```
-poetry install --with dev
+uv sync
 ```
 
 Non-e2e tests can then be run using pytest:
 ```
-pytest tests
+uv run pytest tests
 ```
 
 e2e tests can be included in the test run by providing the ```--e2e``` option and will require the API to be running:
 ```bash
 # With API running on http://localhost:8080
-API_URL=http://localhost:8080 pytest tests --e2e
+API_URL=http://localhost:8080 uv run pytest tests --e2e
 ```
 
 ## Running the API
